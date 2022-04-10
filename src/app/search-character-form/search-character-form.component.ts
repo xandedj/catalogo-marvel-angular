@@ -1,31 +1,48 @@
-import { CharactersApiService } from "./../characters/character/shared/characters-api.service";
-import { HttpClient } from "@angular/common/http";
-import { map } from "rxjs/operators";
-import { Observable } from "rxjs";
-import { MatFormFieldModule } from "@angular/material";
-import { Component, OnInit, Input } from "@angular/core";
-import { FormControl } from "@angular/forms";
+import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 
+import {FormControl} from '@angular/forms';
+import {Observable} from 'rxjs';
+import {map, tap, startWith} from 'rxjs/operators';
 @Component({
   selector: "app-search-character-form",
   templateUrl: "./search-character-form.component.html",
   styleUrls: ["./search-character-form.component.css"],
 })
 export class SearchCharacterFormComponent implements OnInit {
-  @Input()
-  search: any;
 
-  constructor(private characterSvc: CharactersApiService) {}
-  allCharacters: Observable<any>;
+  @Output() change = new EventEmitter();
+  @Input() set data(allCharacters: any[]) {
+    if(allCharacters.length > 0) {
+      this.allCharacters = allCharacters;
+      this.filterNames();
+    }
+  };
+  
+  search = new FormControl();
+  filteredNames: Observable<string[]>;
+  allCharacters: any[] = [];
+  names: string[] = [];
 
-  ngOnInit() {
-    this.getCharacters();
+  constructor() {}
+
+  async ngOnInit() {
+
+    this.filteredNames = this.search.valueChanges.pipe(
+      startWith(''), 
+      tap(async(value) => {
+        if(value.length >= 3) { this.change.emit(value); }
+      }), 
+      map(value => this._filter(value)),
+    );
   }
 
-  getCharacters() {
-    this.allCharacters = this.characterSvc.getAllCharacters();
+  private filterNames() {
+    this.allCharacters.map((character) => { this.names.push(character.name); }); 
   }
-  searchCharacter() {}
-  handleSearch() {}
-  allSearch() {}
+
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.names.filter(option => option.toLowerCase().includes(filterValue));
+  }
+
 }

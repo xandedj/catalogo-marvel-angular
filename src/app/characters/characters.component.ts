@@ -1,8 +1,6 @@
 import { CharactersApiService } from "./character/shared/characters-api.service";
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
-import { Md5 } from "ts-md5/dist/md5";
-import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-characters",
@@ -11,13 +9,20 @@ import { environment } from "src/environments/environment";
 })
 export class CharactersComponent implements OnInit {
   constructor(private characterSvc: CharactersApiService) {}
+  listSearch: any[] = []
   allCharacters: Observable<any>;
 
-  ngOnInit() {
-    this.getCharacters();
+  async ngOnInit() {
+    await this.getCharacters();
   }
 
-  getCharacters() {
-    this.allCharacters = this.characterSvc.getAllCharacters();
+  async getCharacters() {
+    this.allCharacters = await this.characterSvc.getAllCharacters();
+    this.listSearch = await this.allCharacters.toPromise()    
+  }
+
+  async changeSearth(search: string) {
+    this.allCharacters = await this.characterSvc.getCharacters(search);
+    this.listSearch = await this.allCharacters.toPromise()  
   }
 }

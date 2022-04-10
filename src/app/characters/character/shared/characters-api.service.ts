@@ -16,13 +16,19 @@ export class CharactersApiService {
     this.time + environment.publicKey + environment.privateKey
   );
 
-  URL_API = `${environment.baseUrl}/characters?orderBy=name&apikey=${environment.publicKey}`;
+  URL_API = `${environment.baseUrl}/characters?`;
 
   constructor(private http: HttpClient) {}
 
   getAllCharacters(): Observable<any> {
     return this.http
-      .get<any>(this.URL_API)
+      .get<any>(`${this.URL_API}orderBy=name&apikey=${environment.publicKey}`)
+      .pipe(map((data: any) => data.data.results));
+  }
+
+  getCharacters(character: string): Observable<any> {
+    return this.http
+      .get<any>(`${this.URL_API}nameStartsWith=${character}&limit=20&apikey=${environment.publicKey}`)
       .pipe(map((data: any) => data.data.results));
   }
 }
